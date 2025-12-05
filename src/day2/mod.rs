@@ -1,5 +1,3 @@
-use std::fmt::Error;
-
 pub struct Day2Result {
     pub part_1_total: u128,
     pub part_2_total: u128,
@@ -7,7 +5,10 @@ pub struct Day2Result {
 
 impl Day2Result {
     fn new() -> Self {
-        Self { part_1_total: 0, part_2_total: 0 }
+        Self {
+            part_1_total: 0,
+            part_2_total: 0,
+        }
     }
 }
 pub fn day2(input: String) -> Day2Result {
@@ -41,16 +42,27 @@ fn calc_1(start: u128, end: u128) -> u128 {
 fn calc_2(start: u128, end: u128) -> u128 {
     let mut output = 0;
 
-    'outer: for digit in start..=end {
+    for digit in start..=end {
         let d_string = digit.to_string();
-        let d_chars: Vec<char> = digit.to_string().chars().collect();
-        let mut loopy: String = "".to_owned();
-        for i in 0..d_string.len() {
-            loopy = loopy + &d_chars[i].to_string();
-            let test = d_string.split_at(loopy.len());
-            if test.0 == test.1 {
+        let d_chars: Vec<char> = d_string.chars().collect();
+        let mut iterate_str = String::new();
+
+        for c in d_chars {
+            iterate_str += &c.to_string();
+
+            if d_string.len() % iterate_str.len() != 0 {
+                continue;
+            }
+
+            if iterate_str.len() as u128 > (d_string.len() / 2) as u128 {
+                break;
+            }
+
+            let m: Vec<&str> = d_string.matches(&iterate_str).collect();
+
+            if m.len() * iterate_str.len() == d_string.len() {
                 output += digit;
-                continue 'outer;
+                break;
             }
         }
     }
@@ -139,12 +151,12 @@ mod tests {
     #[test]
     fn part_2_test_6() {
         let res = day2(String::from(
-            "11-22,95-115,99-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124",
+            "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124",
         ));
         assert_eq!(res.part_2_total, 4174379265);
     }
 
-    //#[test]
+    #[test]
     fn part_2_test_solution() {
         let day2_input = fs::read_to_string("src/day2/input.txt").unwrap();
         let res = day2(day2_input);

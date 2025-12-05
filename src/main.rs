@@ -16,5 +16,6 @@ fn main() {
     println!("Day 2");
     let day2_input = fs::read_to_string("src/day2/input.txt").unwrap();
     let day2_results = day2::day2(String::from(day2_input));
-    println!("Password: {}", day2_results.part_1_total);
+    println!("part 1 Password: {}", day2_results.part_1_total);
+    println!("part 2 Password: {}", day2_results.part_2_total);
 }
