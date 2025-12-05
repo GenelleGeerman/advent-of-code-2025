@@ -16,52 +16,43 @@ pub fn day2(input: String) -> Day2Result {
     let ranges: Vec<&str> = input.split(",").collect();
 
     for range in ranges {
-        let (start, end): (u128, u128) = range.split_once("-").map(|t| (t.0.parse().unwrap(), t.1.parse().unwrap())).unwrap();
-        output.part_1_total += calc_1(start, end);
-        output.part_2_total += calc_2(start, end);
+        let (start_id, end_id): (u128, u128) = range.split_once("-").map(|t| (t.0.parse().unwrap(), t.1.parse().unwrap())).unwrap();
+        let res = calc(start_id, end_id);
+        output.part_1_total += res.part_1_total;
+        output.part_2_total += res.part_2_total;
     }
     return output;
 }
 
-fn calc_1(start: u128, end: u128) -> u128 {
-    let mut output = 0;
+fn calc(start_id: u128, end_id: u128) -> Day2Result {
+    let mut output = Day2Result::new();
 
-    for digit in start..=end {
-        let d_string = digit.to_string();
-        if (d_string.len() % 2) == 1 {
-            continue;
+    for id in start_id..=end_id {
+        let string_id = id.to_string();
+
+        if (string_id.len() % 2) == 0 {
+            let (part_1, part_2) = string_id.split_at(string_id.len() / 2);
+            if part_1 == part_2 {
+                output.part_1_total += id;
+            }
         }
-        let (part_1, part_2) = d_string.split_at(d_string.len() / 2);
-        if part_1 == part_2 {
-            output += digit;
-        }
-    }
-    return output;
-}
 
-fn calc_2(start: u128, end: u128) -> u128 {
-    let mut output = 0;
-
-    for digit in start..=end {
-        let d_string = digit.to_string();
-        let d_chars: Vec<char> = d_string.chars().collect();
         let mut iterate_str = String::new();
-
-        for c in d_chars {
+        for c in string_id.chars() {
             iterate_str += &c.to_string();
 
-            if d_string.len() % iterate_str.len() != 0 {
+            if string_id.len() % iterate_str.len() != 0 {
                 continue;
             }
 
-            if iterate_str.len() as u128 > (d_string.len() / 2) as u128 {
+            if iterate_str.len() as u128 > (string_id.len() / 2) as u128 {
                 break;
             }
 
-            let m: Vec<&str> = d_string.matches(&iterate_str).collect();
+            let m: Vec<&str> = string_id.matches(&iterate_str).collect();
 
-            if m.len() * iterate_str.len() == d_string.len() {
-                output += digit;
+            if m.len() * iterate_str.len() == string_id.len() {
+                output.part_2_total += id;
                 break;
             }
         }
@@ -160,6 +151,6 @@ mod tests {
     fn part_2_test_solution() {
         let day2_input = fs::read_to_string("src/day2/input.txt").unwrap();
         let res = day2(day2_input);
-        assert_eq!(res.part_2_total, 30599400849);
+        assert_eq!(res.part_2_total, 46270373595);
     }
 }
