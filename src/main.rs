@@ -3,6 +3,7 @@ use std::fs;
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 
 fn main() {
     //day 1
@@ -25,4 +26,10 @@ fn main() {
     let day3_results = day3::day3(day3_input);
     println!("part 1 Password: {}", day3_results.part_1_joltage);
     println!("part 2 Password: {}", day3_results.part_2_joltage);
+    println!("-------------------------------------------------");
+    println!("Day 4");
+    let day4_input = fs::read_to_string("src/day4/input.txt").unwrap();
+    let day4_results = day4::day4(String::from(day4_input));
+    println!("part 1 Password: {}", day4_results.part_1_rolls);
+    println!("part 2 Password: {}", day4_results.part_2_rolls);
 }
