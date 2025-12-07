@@ -22,7 +22,7 @@ fn main() {
     println!("-------------------------------------------------");
     println!("Day 3");
     let day3_input = fs::read_to_string("src/day3/input.txt").unwrap();
-    let day3_results = day3::day3(String::from(day3_input));
+    let day3_results = day3::day3(day3_input);
     println!("part 1 Password: {}", day3_results.part_1_joltage);
     println!("part 2 Password: {}", day3_results.part_2_joltage);
 }
