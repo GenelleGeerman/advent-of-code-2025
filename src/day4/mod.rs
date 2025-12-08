@@ -20,7 +20,9 @@ pub fn day4(input: String) -> Day4Results {
     let mut y = 0;
     for line in input.lines() {
         for char in line.chars() {
-            input_matrix.insert((x, y), char);
+            if is_roll(char) {
+                input_matrix.insert((x, y), char);
+            }
             x += 1;
         }
         x = 0;
@@ -31,7 +33,7 @@ pub fn day4(input: String) -> Day4Results {
 
 fn calc(input: HashMap<(i32, i32), char>) -> Day4Results {
     let mut output: Day4Results = Day4Results::new();
-
+    let mut after_loop_map = input.clone();
     for key in input.keys() {
         let value = *input.get(key).unwrap();
         if !is_roll(value) {
@@ -53,7 +55,13 @@ fn calc(input: HashMap<(i32, i32), char>) -> Day4Results {
         }
         if nearby_rolls < 4 {
             output.part_1_rolls += 1;
+            after_loop_map.remove(key);
         }
+    }
+
+    if after_loop_map.len() < input.len() {
+        output.part_2_rolls = output.part_1_rolls;
+        output.part_2_rolls += calc(after_loop_map).part_2_rolls;
     }
     return output;
 }
@@ -92,17 +100,26 @@ mod tests {
 
     #[test]
     fn part_1_test_solution() {
-        let input = fs::read_to_string("src/day3/input.txt").unwrap();
+        let input = fs::read_to_string("src/day4/input.txt").unwrap();
 
         let res = day4(String::from(input));
         assert_eq!(res.part_1_rolls, 1445);
     }
 
-    fn part_1_test_1() {
+    #[test]
+    fn part_2_test_1() {
         let input =
             "..@@.@@@@.\n@@@.@.@.@@\n@@@@@.@.@@\n@.@@@@..@.\n@@.@@@@.@@\n.@@@@@@@.@\n.@.@.@.@@@\n@.@@@.@@@@\n.@@@@@@@@.\n@.@.@@@.@.";
 
         let res = day4(String::from(input));
         assert_eq!(res.part_2_rolls, 43);
+    }
+
+    #[test]
+    fn part_2_test_solution() {
+        let input = fs::read_to_string("src/day4/input.txt").unwrap();
+
+        let res = day4(String::from(input));
+        assert_eq!(res.part_2_rolls, 8317);
     }
 }
