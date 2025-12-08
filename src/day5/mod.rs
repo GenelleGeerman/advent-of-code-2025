@@ -1,6 +1,3 @@
-use core::num;
-use std::collections::HashSet;
-
 pub struct Day5Results {
     pub part_1_fresh_items: u128,
     pub part_2_fresh_items: u128,
@@ -44,6 +41,20 @@ fn calc(ranges: Vec<(u128, u128)>, ids: Vec<u128>) -> Day5Results {
             }
         }
     }
+
+    /*
+    3-5
+    10-14
+    16-20
+    12-18
+    */
+
+    let mut total: i128 = 0;
+    for (left1, right1) in &ranges {
+        total += (right1 - left1) as i128 + 1;
+    }
+
+    output.part_2_fresh_items = total as u128;
 
     return output;
 }
