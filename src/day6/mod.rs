@@ -17,11 +17,19 @@ pub fn day6(input: String) -> Day6Results {
     let mut operations: Vec<bool> = vec![];
     for line in input.lines() {
         if line.contains('*') || line.contains('+') {
-            operations = line.split(" ").filter(|x| !x.contains(" ")).map(|x| x == "+").collect();
+            operations = line
+                .split(" ")
+                .filter(|x| x.contains("*") || x.contains("+"))
+                .map(|x| x.trim() == "+")
+                .collect();
         } else {
             rows.push(line.split(" ").filter_map(|x| x.parse().ok()).collect());
         }
     }
+    return calc(rows, operations);
+}
+
+fn calc(rows: Vec<Vec<u128>>, operations: Vec<bool>) -> Day6Results {
     let mut results: Vec<u128> = vec![];
     for row in rows {
         for i in 0..row.len() {
@@ -59,5 +67,12 @@ mod tests {
         let input = fs::read_to_string("src/day6/test.txt").unwrap();
         let res = day6(input);
         assert_eq!(res.part_1_grand_total, 4277556);
+    }
+
+    #[test]
+    fn part_1_test_solution() {
+        let input = fs::read_to_string("src/day6/input.txt").unwrap();
+        let res = day6(input);
+        assert_eq!(res.part_1_grand_total, 5361735137219);
     }
 }
