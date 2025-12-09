@@ -43,40 +43,40 @@ fn calc(mut ranges: Vec<(u128, u128)>, ids: Vec<u128>) -> Day5Results {
     }
 
     ranges.sort_by(|a, b| a.0.cmp(&b.0));
-    println!("Sorted:");
-    for range in &ranges {
-        println!("{}, {}", range.0, range.1);
-    }
     let mut new_ranges: Vec<(u128, u128)> = vec![];
-    let mut write_range = *ranges.get(0).unwrap();
-    for i in 1..ranges.len() {
-        let (curr_left, curr_right) = ranges.get(i - 1).unwrap();
-        let (next_left, next_right) = ranges.get(i).unwrap();
-        if next_left >= curr_left && next_left <= curr_right {
-            let l = curr_left;
-            let r = if curr_right >= next_right { curr_right } else { next_right };
+    for range in ranges {
+        println!("{} {}", range.0, range.1);
+        if new_ranges.len() == 0 {
+            new_ranges.push(range);
+            continue;
+        }
 
-            if write_range.0 != *l {
-                new_ranges.push(write_range);
-            }
-            write_range = (*l, *r);
-        } else if next_left > curr_right {
-            new_ranges.push(write_range);
-            write_range = (*next_left, *next_right);
+        let last_entry = new_ranges.last().unwrap();
+
+        if range.0 > last_entry.1 {
+            new_ranges.push(range);
+            continue;
+        }
+
+        if is_in_range(*last_entry, range.0) && !is_in_range(*last_entry, range.1) {
+            let index = &new_ranges.len() - 1;
+            new_ranges[index] = (last_entry.0, range.1);
         }
     }
-
+    println!("---------------");
     let mut total: u128 = 0;
-
-    println!("Final:");
     for range in new_ranges {
-        println!("{}, {}", range.0, range.1);
+        println!("{} {}", range.0, range.1);
         total += range.1 - range.0 + 1;
     }
 
     output.part_2_fresh_items = total;
 
     return output;
+}
+
+fn is_in_range(range: (u128, u128), number: u128) -> bool {
+    number >= range.0 && number <= range.1
 }
 
 #[cfg(test)]
@@ -127,9 +127,16 @@ mod tests {
     }
 
     #[test]
+    fn part_2_test_5() {
+        let input = "0-10\n5-9\n6-8";
+        let res = day5(String::from(input));
+        assert_eq!(res.part_2_fresh_items, 11);
+    }
+
+    #[test]
     fn part_2_test_solution() {
         let input = fs::read_to_string("src/day5/input.txt").unwrap();
         let res = day5(String::from(input));
-        assert_eq!(res.part_2_fresh_items, 848);
+        assert_eq!(res.part_2_fresh_items, 334714395325710);
     }
 }
