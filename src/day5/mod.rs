@@ -33,13 +33,10 @@ pub fn day5(input: String) -> Day5Results {
 fn calc(mut ranges: Vec<(u128, u128)>, ids: Vec<u128>) -> Day5Results {
     let mut output = Day5Results::new();
 
-    'outer: for id in ids {
-        for range in &ranges {
-            if id >= range.0 && id <= range.1 {
-                output.part_1_fresh_items += 1;
-                continue 'outer;
-            }
-        }
+    for id in ids {
+        if ranges.iter().any(|range| id >= range.0 && id <= range.1) {
+            output.part_1_fresh_items += 1;
+        };
     }
 
     ranges.sort_by(|a, b| a.0.cmp(&b.0));
@@ -62,12 +59,8 @@ fn calc(mut ranges: Vec<(u128, u128)>, ids: Vec<u128>) -> Day5Results {
             filtered_ranges[index] = (previous_range.0, range.1);
         }
     }
-    let mut total: u128 = 0;
-    for range in filtered_ranges {
-        total += range.1 - range.0 + 1;
-    }
 
-    output.part_2_fresh_items = total;
+    output.part_2_fresh_items = filtered_ranges.iter().map(|range| range.1 - range.0 + 1).sum();
     return output;
 }
 
