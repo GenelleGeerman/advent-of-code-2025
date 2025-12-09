@@ -43,35 +43,31 @@ fn calc(mut ranges: Vec<(u128, u128)>, ids: Vec<u128>) -> Day5Results {
     }
 
     ranges.sort_by(|a, b| a.0.cmp(&b.0));
-    let mut new_ranges: Vec<(u128, u128)> = vec![];
+    let mut filtered_ranges: Vec<(u128, u128)> = vec![];
     for range in ranges {
-        println!("{} {}", range.0, range.1);
-        if new_ranges.len() == 0 {
-            new_ranges.push(range);
+        if filtered_ranges.len() == 0 {
+            filtered_ranges.push(range);
             continue;
         }
 
-        let last_entry = new_ranges.last().unwrap();
+        let previous_range = filtered_ranges.last().unwrap();
 
-        if range.0 > last_entry.1 {
-            new_ranges.push(range);
+        if range.0 > previous_range.1 {
+            filtered_ranges.push(range);
             continue;
         }
 
-        if is_in_range(*last_entry, range.0) && !is_in_range(*last_entry, range.1) {
-            let index = &new_ranges.len() - 1;
-            new_ranges[index] = (last_entry.0, range.1);
+        if is_in_range(*previous_range, range.0) && !is_in_range(*previous_range, range.1) {
+            let index = &filtered_ranges.len() - 1;
+            filtered_ranges[index] = (previous_range.0, range.1);
         }
     }
-    println!("---------------");
     let mut total: u128 = 0;
-    for range in new_ranges {
-        println!("{} {}", range.0, range.1);
+    for range in filtered_ranges {
         total += range.1 - range.0 + 1;
     }
 
     output.part_2_fresh_items = total;
-
     return output;
 }
 
