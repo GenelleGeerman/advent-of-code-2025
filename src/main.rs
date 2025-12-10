@@ -8,11 +8,11 @@ mod day5;
 mod day6;
 
 fn main() {
-    run_day_1();
-    run_day_2();
-    run_day_3();
-    run_day_4();
-    run_day_5();
+    // run_day_1();
+    // run_day_2();
+    // run_day_3();
+    // run_day_4();
+    // run_day_5();
     run_day_6();
 }
 
@@ -64,7 +64,6 @@ fn run_day_6() {
     println!("-------------------------------------------------");
     println!("Day 6");
     let day6_input = fs::read_to_string("src/day6/input.txt").unwrap();
-    //let day6_test = fs::read_to_string("src/day6/test.txt").unwrap();
     let day6_results = day6::day6(day6_input);
     println!("part 1 Password: {}", day6_results.part_1_grand_total);
     println!("part 2 Password: {}", day6_results.part_2_grand_total);
