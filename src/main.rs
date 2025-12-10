@@ -74,7 +74,6 @@ fn run_day_7() {
     println!("-------------------------------------------------");
     println!("Day 7");
     let day7_input = fs::read_to_string("src/day7/input.txt").unwrap();
-    //let day7_input = fs::read_to_string("src/day7/test.txt").unwrap();
     let day7_results = day7::day7(day7_input);
     println!("part 1 Password: {}", day7_results.part_1_total_splits);
     println!("part 2 Password: {}", day7_results.part_2_total_splits);
