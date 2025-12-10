@@ -7,6 +7,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 fn main() {
     // run_day_1();
@@ -15,7 +16,8 @@ fn main() {
     // run_day_4();
     // run_day_5();
     // run_day_6();
-    run_day_7();
+    // run_day_7();
+    run_day_8();
 }
 
 fn run_day_1() {
@@ -77,4 +79,12 @@ fn run_day_7() {
     let day7_results = day7::day7(day7_input);
     println!("part 1 Password: {}", day7_results.part_1_total_splits);
     println!("part 2 Password: {}", day7_results.part_2_total_splits);
+}
+fn run_day_8() {
+    println!("-------------------------------------------------");
+    println!("Day 8");
+    let day8_input = fs::read_to_string("src/day8/input.txt").unwrap();
+    let day8_results = day8::day8(day8_input);
+    println!("part 1 Password: {}", day8_results.part_1_total_splits);
+    println!("part 2 Password: {}", day8_results.part_2_total_splits);
 }
