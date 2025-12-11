@@ -10,7 +10,14 @@ struct JunctionBox {
     pub position: Vector3i,
     pub is_connected: bool,
 }
-#[derive(Clone, Copy)]
+
+impl PartialEq for JunctionBox {
+    fn eq(&self, other: &Self) -> bool {
+        self.position == other.position
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 struct Vector3i {
     x: i128,
     y: i128,
@@ -18,8 +25,8 @@ struct Vector3i {
 }
 
 impl Vector3i {
-    fn mgn(self) -> i128 {
-        ((self.x.pow(2) + self.y.pow(2) + self.z.pow(2)) as f64) as i128
+    pub fn distance_to(&self, other: Vector3i) -> i128 {
+        ((self.x - other.x).pow(2) + (self.y - other.y).pow(2) + (self.z - other.z).pow(2)).isqrt()
     }
 }
 
@@ -34,6 +41,7 @@ impl JunctionBox {
         self.position.x == b.position.x && self.position.y == b.position.y && self.position.z == b.position.z
     }
 }
+
 impl Day8Results {
     fn new() -> Self {
         Self {
@@ -48,6 +56,7 @@ pub fn day8(input: String) -> Day8Results {
     for line in input.lines() {
         let l: Vec<i128> = line.split(",").filter_map(|c| c.parse::<i128>().ok()).collect();
         let pos: Vector3i = Vector3i { x: l[0], y: l[1], z: l[2] };
+
         junction_boxes.push(JunctionBox {
             position: pos,
             is_connected: false,
@@ -57,29 +66,10 @@ pub fn day8(input: String) -> Day8Results {
 }
 
 fn calc(junction_boxes: Vec<JunctionBox>) -> Day8Results {
-    let output: Day8Results = Day8Results::new();
-    let mut pairs: Vec<(JunctionBox, JunctionBox)> = vec![];
-    for j in &junction_boxes {
-        let mut dist = MAX;
-        let mut index = 0;
-        for i in 0..junction_boxes.len() {
-            let b = junction_boxes.get(i).unwrap();
-            if j.equals(*b) {
-                continue;
-            }
-            let new_dist = (j.position.mgn() - b.position.mgn()).abs();
-            if dist > new_dist {
-                dist = new_dist;
-                index = i;
-            }
-        }
-        let b: &JunctionBox = junction_boxes.get(index).unwrap();
-        pairs.push((*j, *b));
+    Day8Results {
+        part_1_total_splits: 0,
+        part_2_total_splits: 0,
     }
-    for pair in pairs {
-        println!("{} - {}", pair.0, pair.1);
-    }
-    return output;
 }
 
 #[cfg(test)]
@@ -91,27 +81,27 @@ mod tests {
     fn part_1_test_1() {
         let input = fs::read_to_string("src/day8/test.txt").unwrap();
         let res = day8(input);
-        assert_eq!(res.part_1_total_splits, 21);
+        assert_eq!(res.part_1_total_splits, 40);
     }
 
-    #[test]
-    fn part_1_test_solution() {
-        let input = fs::read_to_string("src/day8/input.txt").unwrap();
-        let res = day8(input);
-        assert_eq!(res.part_1_total_splits, 1585);
-    }
+    // #[test]
+    // fn part_1_test_solution() {
+    //     let input = fs::read_to_string("src/day8/input.txt").unwrap();
+    //     let res = day8(input);
+    //     assert_eq!(res.part_1_total_splits, 1585);
+    // }
 
-    #[test]
-    fn part_2_test_1() {
-        let input = fs::read_to_string("src/day8/test.txt").unwrap();
-        let res = day8(input);
-        assert_eq!(res.part_2_total_splits, 40);
-    }
+    // #[test]
+    // fn part_2_test_1() {
+    //     let input = fs::read_to_string("src/day8/test.txt").unwrap();
+    //     let res = day8(input);
+    //     assert_eq!(res.part_2_total_splits, 40);
+    // }
 
-    #[test]
-    fn part_2_test_solution() {
-        let input = fs::read_to_string("src/day8/input.txt").unwrap();
-        let res = day8(input);
-        assert_eq!(res.part_2_total_splits, 16716444407407);
-    }
+    // #[test]
+    // fn part_2_test_solution() {
+    //     let input = fs::read_to_string("src/day8/input.txt").unwrap();
+    //     let res = day8(input);
+    //     assert_eq!(res.part_2_total_splits, 16716444407407);
+    // }
 }
