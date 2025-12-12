@@ -1,23 +1,16 @@
-use std::{fmt, i128::MAX};
+use std::fmt;
 
 pub struct Day8Results {
     pub part_1_total_splits: i128,
     pub part_2_total_splits: u128,
 }
 
-#[derive(Clone, Copy)]
-struct JunctionBox {
-    pub position: Vector3i,
-    pub is_connected: bool,
+#[derive(Default)]
+struct Connections {
+    pub positions: Vec<Vector3i>,
 }
 
-impl PartialEq for JunctionBox {
-    fn eq(&self, other: &Self) -> bool {
-        self.position == other.position
-    }
-}
-
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Default)]
 struct Vector3i {
     x: i128,
     y: i128,
@@ -25,20 +18,14 @@ struct Vector3i {
 }
 
 impl Vector3i {
-    pub fn distance_to(&self, other: Vector3i) -> i128 {
-        ((self.x - other.x).pow(2) + (self.y - other.y).pow(2) + (self.z - other.z).pow(2)).isqrt()
+    pub fn distance_to(&self, other: Vector3i) -> u128 {
+        (self.x - other.x).pow(2) as u128 + (self.y - other.y).pow(2) as u128 + (self.z - other.z).pow(2) as u128
     }
 }
 
-impl fmt::Display for JunctionBox {
+impl fmt::Display for Vector3i {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({}, {}, {})", self.position.x, self.position.y, self.position.z)
-    }
-}
-
-impl JunctionBox {
-    fn equals(&self, b: JunctionBox) -> bool {
-        self.position.x == b.position.x && self.position.y == b.position.y && self.position.z == b.position.z
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
 
@@ -52,24 +39,52 @@ impl Day8Results {
 }
 
 pub fn day8(input: String) -> Day8Results {
-    let mut junction_boxes: Vec<JunctionBox> = vec![];
+    let mut coords: Vec<Vector3i> = vec![];
     for line in input.lines() {
         let l: Vec<i128> = line.split(",").filter_map(|c| c.parse::<i128>().ok()).collect();
         let pos: Vector3i = Vector3i { x: l[0], y: l[1], z: l[2] };
-
-        junction_boxes.push(JunctionBox {
-            position: pos,
-            is_connected: false,
-        });
+        coords.push(pos);
     }
-    return calc(junction_boxes);
+    return calc(coords);
 }
 
-fn calc(junction_boxes: Vec<JunctionBox>) -> Day8Results {
-    Day8Results {
-        part_1_total_splits: 0,
-        part_2_total_splits: 0,
+fn calc(coordinates: Vec<Vector3i>) -> Day8Results {
+    let mut connections: Vec<Connections> = vec![];
+
+    'outer: for i in 0..coordinates.len() {
+        let mut coord = coordinates.get(i).unwrap();
+        let mut dist = u128::MAX;
+        let mut closest: Vector3i = Vector3i::default();
+        for j in 0..coordinates.len() {
+            let compare = *coordinates.get_mut(j).unwrap();
+            if *coord == compare {
+                continue;
+            }
+            let calc = coord.distance_to(compare);
+            if dist > calc {
+                dist = calc;
+                closest = compare;
+            }
+        }
+        for mut connection in connections {
+            if connection.positions.contains(&closest) {
+                connection.positions.push(*coord);
+                continue 'outer;
+            }
+        }
+
+        let mut new_conn = Connections { positions: vec![] };
+        new_conn.positions.push(closest);
+        new_conn.positions.push(*coord);
+        connections.push(new_conn);
     }
+
+    let mut output = Day8Results::new();
+    for c in connections {
+        output.part_1_total_splits += c.positions.len() as i128;
+    }
+
+    return output;
 }
 
 #[cfg(test)]
