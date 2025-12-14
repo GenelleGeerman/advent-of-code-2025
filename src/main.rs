@@ -83,8 +83,12 @@ fn run_day_7() {
 fn run_day_8() {
     println!("-------------------------------------------------");
     println!("Day 8");
-    let day8_input = fs::read_to_string("src/day8/test.txt").unwrap();
-    let day8_results = day8::day8(day8_input);
-    println!("part 1 Password: {}", day8_results.part_1_total_splits);
-    println!("part 2 Password: {}", day8_results.part_2_total_splits);
+    println!(
+        "part 1 Password: {}",
+        day8::day8(fs::read_to_string("src/day8/input.txt").unwrap(), 1000).part_1_total_connections
+    );
+    println!(
+        "part 2 Password: {}",
+        day8::day8(fs::read_to_string("src/day8/input.txt").unwrap(), 0).part_2_total_connections
+    );
 }

@@ -1,90 +1,124 @@
-use std::fmt;
-
-pub struct Day8Results {
-    pub part_1_total_splits: i128,
-    pub part_2_total_splits: u128,
-}
+use std::{collections::HashSet, fmt::Display, hash::Hash, ops::Index};
 
 #[derive(Default)]
-struct Connections {
-    pub positions: Vec<Vector3i>,
+pub struct Day8Results {
+    pub part_1_total_connections: i64,
+    pub part_2_total_connections: u128,
 }
 
-#[derive(Clone, Copy, PartialEq, Default)]
-struct Vector3i {
-    x: i128,
-    y: i128,
-    z: i128,
+#[derive(Default, PartialEq, Eq, Hash, Clone, Copy)]
+struct Coord {
+    x: i64,
+    y: i64,
+    z: i64,
 }
 
-impl Vector3i {
-    pub fn distance_to(&self, other: Vector3i) -> u128 {
-        (self.x - other.x).pow(2) as u128 + (self.y - other.y).pow(2) as u128 + (self.z - other.z).pow(2) as u128
-    }
-}
-
-impl fmt::Display for Vector3i {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for Coord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
 
-impl Day8Results {
-    fn new() -> Self {
-        Self {
-            part_1_total_splits: 0,
-            part_2_total_splits: 0,
-        }
-    }
-}
-
-pub fn day8(input: String) -> Day8Results {
-    let mut coords: Vec<Vector3i> = vec![];
+pub fn day8(input: String, limiter: usize) -> Day8Results {
+    let mut coords: Vec<Coord> = vec![];
     for line in input.lines() {
-        let l: Vec<i128> = line.split(",").filter_map(|c| c.parse::<i128>().ok()).collect();
-        let pos: Vector3i = Vector3i { x: l[0], y: l[1], z: l[2] };
+        let l: Vec<i64> = line.split(",").filter_map(|c| c.parse().ok()).collect();
+        let pos = Coord { x: l[0], y: l[1], z: l[2] };
         coords.push(pos);
     }
-    return calc(coords);
+    return calc(coords, limiter);
 }
 
-fn calc(coordinates: Vec<Vector3i>) -> Day8Results {
-    let mut connections: Vec<Connections> = vec![];
+fn calc(coordinates: Vec<Coord>, limiter: usize) -> Day8Results {
+    let mut output = Day8Results::default();
+    let distances: Vec<(i64, Coord, Coord)> = get_distances(&coordinates);
+    let total = coordinates.len();
+    let (mut connections, part2_edge) = get_connections(distances, limiter, total);
 
-    'outer: for i in 0..coordinates.len() {
-        let mut coord = coordinates.get(i).unwrap();
-        let mut dist = u128::MAX;
-        let mut closest: Vector3i = Vector3i::default();
-        for j in 0..coordinates.len() {
-            let compare = *coordinates.get_mut(j).unwrap();
-            if *coord == compare {
-                continue;
-            }
-            let calc = coord.distance_to(compare);
-            if dist > calc {
-                dist = calc;
-                closest = compare;
-            }
-        }
-        for mut connection in connections {
-            if connection.positions.contains(&closest) {
-                connection.positions.push(*coord);
-                continue 'outer;
-            }
-        }
-
-        let mut new_conn = Connections { positions: vec![] };
-        new_conn.positions.push(closest);
-        new_conn.positions.push(*coord);
-        connections.push(new_conn);
-    }
-
-    let mut output = Day8Results::new();
-    for c in connections {
-        output.part_1_total_splits += c.positions.len() as i128;
+    connections.sort_by_key(|conn| conn.len());
+    connections.reverse();
+    output.part_1_total_connections = connections.iter().take(3).map(|f| f.len()).product::<usize>() as i64;
+    if limiter == 0 {
+        output.part_2_total_connections = {
+            let (a, b) = part2_edge.unwrap();
+            (a.x * b.x) as u128
+        };
     }
 
     return output;
+}
+
+fn get_distances(coordinates: &Vec<Coord>) -> Vec<(i64, Coord, Coord)> {
+    let mut distances: Vec<(i64, Coord, Coord)> = Vec::new();
+    for i in 0..coordinates.len() {
+        for j in (i + 1)..coordinates.len() {
+            let a = coordinates[i];
+            let b = coordinates[j];
+            let dist = distance(a, b);
+            distances.push((dist as i64, a, b));
+        }
+    }
+    distances.sort_by_key(|(distance, _, _)| *distance);
+    return distances;
+}
+
+fn distance(p: Coord, q: Coord) -> i64 {
+    let dx = p.x - q.x;
+    let dy = p.y - q.y;
+    let dz = p.z - q.z;
+    dx * dx + dy * dy + dz * dz
+}
+
+fn get_connections(distances: Vec<(i64, Coord, Coord)>, mut limiter: usize, total: usize) -> (Vec<HashSet<Coord>>, Option<(Coord, Coord)>) {
+    let mut connections: Vec<HashSet<Coord>> = vec![];
+    let mut part2_edge: Option<(Coord, Coord)> = None;
+    if limiter == 0 {
+        limiter = distances.len();
+    }
+    for (_, a, b) in distances.iter().take(limiter) {
+        let mut index_a = None;
+        let mut index_b = None;
+
+        for (i, conn) in connections.iter().enumerate() {
+            if conn.contains(&a) {
+                index_a = Some(i);
+            }
+            if conn.contains(&b) {
+                index_b = Some(i);
+            }
+        }
+
+        match (index_a, index_b) {
+            (Some(i), Some(j)) if i == j => {}
+            (Some(i), Some(j)) => {
+                let target = i.min(j);
+                let other = connections.remove(j.max(i));
+                connections[target].extend(other);
+                if connections[target].len() == total && part2_edge.is_none() {
+                    part2_edge = Some((*a, *b));
+                }
+            }
+            (Some(i), None) => {
+                connections[i].insert(*b);
+                if connections[i].len() == total && part2_edge.is_none() {
+                    part2_edge = Some((*a, *b));
+                }
+            }
+            (None, Some(i)) => {
+                connections[i].insert(*a);
+                if connections[i].len() == total && part2_edge.is_none() {
+                    part2_edge = Some((*a, *b));
+                }
+            }
+            (None, None) => {
+                let mut s = HashSet::new();
+                s.insert(*a);
+                s.insert(*b);
+                connections.push(s);
+            }
+        }
+    }
+    return (connections, part2_edge);
 }
 
 #[cfg(test)]
@@ -95,28 +129,25 @@ mod tests {
     #[test]
     fn part_1_test_1() {
         let input = fs::read_to_string("src/day8/test.txt").unwrap();
-        let res = day8(input);
-        assert_eq!(res.part_1_total_splits, 40);
+        let res = day8(input, 10);
+        assert_eq!(res.part_1_total_connections, 40);
     }
-
-    // #[test]
-    // fn part_1_test_solution() {
-    //     let input = fs::read_to_string("src/day8/input.txt").unwrap();
-    //     let res = day8(input);
-    //     assert_eq!(res.part_1_total_splits, 1585);
-    // }
-
-    // #[test]
-    // fn part_2_test_1() {
-    //     let input = fs::read_to_string("src/day8/test.txt").unwrap();
-    //     let res = day8(input);
-    //     assert_eq!(res.part_2_total_splits, 40);
-    // }
-
-    // #[test]
-    // fn part_2_test_solution() {
-    //     let input = fs::read_to_string("src/day8/input.txt").unwrap();
-    //     let res = day8(input);
-    //     assert_eq!(res.part_2_total_splits, 16716444407407);
-    // }
+    #[test]
+    fn part_1_test_solution() {
+        let input = fs::read_to_string("src/day8/input.txt").unwrap();
+        let res = day8(input, 1000);
+        assert_eq!(res.part_1_total_connections, 90036);
+    }
+    #[test]
+    fn part_2_test_test_1() {
+        let input = fs::read_to_string("src/day8/test.txt").unwrap();
+        let res = day8(input, 0);
+        assert_eq!(res.part_2_total_connections, 25272);
+    }
+    #[test]
+    fn part_2_test_test_solution() {
+        let input = fs::read_to_string("src/day8/input.txt").unwrap();
+        let res = day8(input, 0);
+        assert_eq!(res.part_2_total_connections, 6083499488);
+    }
 }
