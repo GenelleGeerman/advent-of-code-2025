@@ -8,6 +8,7 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 
 fn main() {
     // run_day_1();
@@ -17,7 +18,8 @@ fn main() {
     // run_day_5();
     // run_day_6();
     // run_day_7();
-    run_day_8();
+    //run_day_8();
+    run_day_9();
 }
 
 fn run_day_1() {
@@ -91,4 +93,12 @@ fn run_day_8() {
         "part 2 Password: {}",
         day8::day8(fs::read_to_string("src/day8/input.txt").unwrap(), 0).part_2_total_connections
     );
+}
+fn run_day_9() {
+    println!("-------------------------------------------------");
+    println!("Day 9");
+    let day9_input = fs::read_to_string("src/day9/test.txt").unwrap();
+    let day9_results = day9::day9(day9_input);
+    println!("part 1 Password: {}", day9_results.part_1_largest_area);
+    println!("part 2 Password: {}", day9_results.part_2_largest_area);
 }
