@@ -24,6 +24,14 @@ struct Edge {
     right: Coord,
 }
 
+#[derive(Default, PartialEq, Eq, Hash, Clone, Copy)]
+struct Box {
+    topLeft: Coord,
+    topRight: Coord,
+    bottomLeft: Coord,
+    bottomRight: Coord,
+}
+
 impl Edge {
     fn contains(&self, coord: Coord) -> bool {
         self.left.x < coord.x && self.right.x > coord.x && self.left.y < coord.y && self.right.y > coord.y
@@ -44,7 +52,9 @@ fn calc(coordinates: Vec<Coord>) -> Day9Results {
     let mut output = Day9Results::default();
 
     let mut largest = 0;
-    let mut edges: Vec<Edge> = vec![];
+    let mut largest2 = 0;
+    let mut boxes: Vec<Edge> = vec![];
+    let iter_coordinate = coordinates.clone();
     for i in 0..coordinates.len() {
         let a = coordinates.get(i).unwrap();
         for j in i + 1..coordinates.len() {
@@ -57,14 +67,32 @@ fn calc(coordinates: Vec<Coord>) -> Day9Results {
             if a.x == b.x || a.y == b.y {
                 edges.push(Edge { left: *a, right: *b })
             }
+
+            let ab = Coord { x: a.x, y: b.y };
+            let ba = Coord { x: b.x, y: a.y };
+            if !coordinates.contains(&ab) {
+                if !is_within(ab, &iter_coordinate) {
+                    continue;
+                }
+            }
+            if !coordinates.contains(&ba) {
+                if !is_within(ba, &iter_coordinate) {
+                    continue;
+                }
+            }
+            largest2 = largest;
         }
     }
-    //  if largest2 <= area && (coordinates.contains(&Coord { x: a.x, y: b.y }) || coordinates.contains(&Coord { x: b.x, y: a.y })) {
-    //             println!("{area}");
-    //             largest2 = area;
-    //         }
     output.part_1_largest_area = largest;
+    output.part_2_largest_area = largest2;
     return output;
+}
+
+fn is_within(cell: Coord, coordinates: &Vec<Coord>) -> bool {
+    (coordinates.iter().filter(|coord| coord.y == cell.y).any(|coord| coord.x > cell.x)
+        && coordinates.iter().filter(|coord| coord.y == cell.y).any(|coord| coord.x < cell.x))
+        || (coordinates.iter().filter(|coord| coord.x == cell.x).any(|coord| coord.y > cell.y)
+            && coordinates.iter().filter(|coord| coord.x == cell.x).any(|coord| coord.y < cell.y))
 }
 
 #[cfg(test)]
